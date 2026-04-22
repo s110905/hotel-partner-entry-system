@@ -158,6 +158,7 @@ function App() {
 
       {session.role === 'partner' && (
         <PartnerPanel
+          session={session}
           records={records}
           onAdd={handleAddRecord}
           onIncrementDownload={handleIncrementDownload}

@@ -3,19 +3,18 @@ import { ClipboardList, Clock, Download, QrCode, TrendingUp } from 'lucide-react
 import { CreateQRForm } from '../../components/partner/CreateQRForm'
 import { QRList } from '../../components/partner/QRList'
 import { isExpired } from '../../utils/status'
+import type { AuthSession } from '../../lib/authService'
 import type { QrRecord } from '../../types/qr'
 import './PartnerPanel.css'
 
 type PartnerPanelProps = {
+  session: AuthSession
   records: QrRecord[]
   onAdd: (partnerName: string, totalQuota: number) => Promise<void>
   onIncrementDownload: (id: string) => Promise<void>
 }
 
-export function PartnerPanel({ records, onAdd, onIncrementDownload }: PartnerPanelProps) {
-  const handleAddRecord = async (partnerName: string, totalQuota: number) => {
-    await onAdd(partnerName, totalQuota)
-  }
+export function PartnerPanel({ session, records, onAdd, onIncrementDownload }: PartnerPanelProps) {
 
   const stats = {
     issuedCount: records.length,
@@ -121,7 +120,7 @@ export function PartnerPanel({ records, onAdd, onIncrementDownload }: PartnerPan
 
       <div className="partner-layout">
         <aside className="partner-form-column">
-          <CreateQRForm onAdd={handleAddRecord} />
+          <CreateQRForm partnerName={session.name} onAdd={onAdd} />
         </aside>
 
         <div className="partner-list-column">
