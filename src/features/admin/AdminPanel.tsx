@@ -61,13 +61,13 @@ export function AdminPanel({ partnerSummaries, records, onToggleDisable }: Props
   )
 
   const statCards = [
-    { label: '合作夥伴數',   value: partnerSummaries.length, unit: '家' },
-    { label: 'QR 建立數',   value: totals.qrCount,           unit: '張' },
-    { label: '下載次數',     value: totals.downloadCount,     unit: '次' },
-    { label: '總可用名額',   value: totals.totalQuota,        unit: '人' },
-    { label: '已核銷人數',   value: totals.usedQuota,         unit: '人' },
-    { label: '剩餘名額',     value: totals.remainingQuota,    unit: '人' },
-    { label: '過期未使用',   value: totals.expiredUnusedQuota, unit: '人' },
+    { label: '合作夥伴數',   value: partnerSummaries.length, unit: '家', type: 'default' },
+    { label: 'QR 建立數',   value: totals.qrCount,           unit: '張', type: 'default' },
+    { label: '下載次數',     value: totals.downloadCount,     unit: '次', type: 'default' },
+    { label: '總可用名額',   value: totals.totalQuota,        unit: '人', type: 'default' },
+    { label: '已核銷人數',   value: totals.usedQuota,         unit: '人', type: 'success' },
+    { label: '剩餘名額',     value: totals.remainingQuota,    unit: '人', type: 'info' },
+    { label: '過期未使用',   value: totals.expiredUnusedQuota, unit: '人', type: 'danger' },
   ]
 
   // ── QR list (with live status) ─────────────────────────
@@ -89,15 +89,22 @@ export function AdminPanel({ partnerSummaries, records, onToggleDisable }: Props
 
   async function toggleDisabled(record: QrRecord) {
     const nextDisabled = !record.disabled
+    const msg = nextDisabled
+      ? '確定要停用這張 QR 嗎？停用後客人將無法使用。'
+      : '確定要恢復這張 QR 嗎？'
+    
+    if (!window.confirm(msg)) return
+
     try {
       await onToggleDisable(record.id, nextDisabled)
-      setActionMessage(
-        nextDisabled
-          ? `已停用 ${record.partnerName} 的 QR。`
-          : `已恢復 ${record.partnerName} 的 QR。`,
-      )
+      const successMsg = nextDisabled
+        ? `已停用 ${record.partnerName} 的 QR。`
+        : `已恢復 ${record.partnerName} 的 QR。`
+      setActionMessage(successMsg)
+      setTimeout(() => setActionMessage(''), 3000)
     } catch (err) {
       setActionMessage('操作失敗，請稍後再試。')
+      setTimeout(() => setActionMessage(''), 3000)
     }
   }
 
@@ -118,7 +125,7 @@ export function AdminPanel({ partnerSummaries, records, onToggleDisable }: Props
         ) : null}
         <div className="admin-summary-grid">
           {statCards.map(c => (
-            <div className="admin-stat-card" key={c.label}>
+            <div className={`admin-stat-card admin-stat-${c.type}`} key={c.label}>
               <div className="admin-stat-label">{c.label}</div>
               <div className="admin-stat-value">{c.value}</div>
               <div className="admin-stat-unit">{c.unit}</div>

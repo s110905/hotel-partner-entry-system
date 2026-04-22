@@ -52,7 +52,10 @@ function App() {
   }
 
   const handleViewChange = (newView: ViewKey) => {
+    if (newView === view) return
     setView(newView)
+    if (newView === 'scan') return
+    if (session && (session.role as string) === newView) return
     setSession(null)
   }
 
@@ -88,7 +91,7 @@ function App() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <div className="app-loading">
         <p>載入中...</p>
       </div>
     )
@@ -96,8 +99,8 @@ function App() {
 
   if (error) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <p style={{ color: 'red' }}>{error}</p>
+      <div className="app-error">
+        <p>{error}</p>
       </div>
     )
   }
@@ -119,56 +122,53 @@ function App() {
             管理後台 (Admin)
           </button>
         </nav>
-        <LoginPage onLogin={setSession} defaultRole={view === 'admin' ? 'admin' : 'partner'} />
+        <LoginPage
+          onLogin={setSession}
+          defaultRole={view === 'admin' ? 'admin' : 'partner'}
+          contextLabel={view === 'admin' ? '管理後台（系統管理員）' : '發放憑證（合作飯店）'}
+        />
       </div>
     )
   }
 
   return (
     <div className="app-shell">
-      <header className="hero-panel" style={{ position: 'relative' }}>
+      {view !== 'scan' && (
+        <header className="hero-panel">
+          <div>
+            <p className="eyebrow">展示系統</p>
+            <h1>飯店合作夥伴入場管理系統</h1>
+            <p className="hero-copy">
+              歡迎使用 QR First 入場管理系統。本系統提供合作飯店專屬憑證發放、現場快速掃碼核銷與即時使用狀態追蹤功能，確保入場流程順暢安全。
+            </p>
+          </div>
+          <div className="hero-badges">
+            <span>7 天有效期</span>
+            <span>多人額度</span>
+            <span>可分次核銷</span>
+          </div>
+        </header>
+      )}
+
+      <nav className="tab-bar-container">
+        <div className="tab-bar" aria-label="主要區塊">
+          <button className={view === 'partner' ? 'active' : ''} onClick={() => handleViewChange('partner')} type="button">
+            發放憑證 (Partner)
+          </button>
+          <button className={(view as any) === 'scan' ? 'active' : ''} onClick={() => handleViewChange('scan')} type="button">
+            現場核銷 (Scan)
+          </button>
+          <button className={view === 'admin' ? 'active' : ''} onClick={() => handleViewChange('admin')} type="button">
+            管理後台 (Admin)
+          </button>
+        </div>
+        
         {session && (
-          <div style={{ position: 'absolute', top: '20px', right: '20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ fontSize: '0.9rem', color: '#64748b' }}>{session.name} ({session.role})</span>
-            <button
-              onClick={handleLogout}
-              style={{
-                padding: '4px 12px',
-                borderRadius: '6px',
-                border: '1px solid #e2e8f0',
-                background: '#fff',
-                fontSize: '0.85rem',
-                cursor: 'pointer'
-              }}
-            >
-              登出
-            </button>
+          <div className="user-status">
+            <span className="user-info">{session.name} ({session.role})</span>
+            <button className="logout-btn" onClick={handleLogout}>登出</button>
           </div>
         )}
-        <div>
-          <p className="eyebrow">展示系統</p>
-          <h1>飯店合作夥伴入場管理系統</h1>
-          <p className="hero-copy">
-            歡迎使用 QR First 入場管理系統。本系統提供合作飯店專屬憑證發放、現場快速掃碼核銷與即時使用狀態追蹤功能，確保入場流程順暢安全。
-          </p>
-        </div>
-        <div className="hero-badges">
-          <span>7 天有效期</span>
-          <span>多人額度</span>
-          <span>可分次核銷</span>
-        </div>
-      </header>
-
-      <nav className="tab-bar" aria-label="主要區塊">
-        <button className={view === 'partner' ? 'active' : ''} onClick={() => handleViewChange('partner')} type="button">
-          發放憑證 (Partner)
-        </button>
-        <button className={view === 'scan' ? 'active' : ''} onClick={() => handleViewChange('scan')} type="button">
-          現場核銷 (Scan)
-        </button>
-        <button className={view === 'admin' ? 'active' : ''} onClick={() => handleViewChange('admin')} type="button">
-          管理後台 (Admin)
-        </button>
       </nav>
 
       <section className="notice-bar">

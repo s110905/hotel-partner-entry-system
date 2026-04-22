@@ -426,6 +426,18 @@
   margin: 0;
 }
 
+.scan-zero-quota-warning {
+  margin-top: 16px;
+  padding: 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  color: #dc2626;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: center;
+}
+
 @media (max-width: 540px) {
   .scan-search-row { flex-direction: column; }
   .scan-search-input,

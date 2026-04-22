@@ -51,6 +51,13 @@
   color: #9a7b6a;
 }
 
+/* Stat Card Colors */
+.admin-stat-success .admin-stat-value { color: #16a34a; }
+.admin-stat-info .admin-stat-value { color: #2563eb; }
+.admin-stat-danger { background: #fef2f2; border-color: #fecaca; }
+.admin-stat-danger .admin-stat-value { color: #dc2626; }
+.admin-stat-danger .admin-stat-label { color: #991b1b; }
+
 /* ── Tabs ─────────────────────────────────────── */
 .admin-tabs {
   display: flex;

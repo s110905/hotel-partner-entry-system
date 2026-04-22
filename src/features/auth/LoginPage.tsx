@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import type { AuthRole, AuthSession } from '../../lib/authService'
 import { loginAdmin, loginPartner } from '../../lib/authService'
+import './LoginPage.css'
 
 type Props = {
   onLogin: (session: AuthSession) => void
   defaultRole?: AuthRole
+  contextLabel?: string
 }
 
-export function LoginPage({ onLogin, defaultRole = 'partner' }: Props) {
+export function LoginPage({ onLogin, defaultRole = 'partner', contextLabel }: Props) {
   const [role, setRole] = useState<AuthRole>(defaultRole)
   const [account, setAccount] = useState('')
   const [password, setPassword] = useState('')
@@ -31,102 +33,58 @@ export function LoginPage({ onLogin, defaultRole = 'partner' }: Props) {
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: '#f8fafc',
-    }}>
-      <div style={{
-        background: '#fff',
-        borderRadius: '12px',
-        padding: '40px',
-        width: '100%',
-        maxWidth: '400px',
-        boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
-      }}>
-        <h1 style={{ marginBottom: '8px', fontSize: '1.4rem' }}>飯店入場管理系統</h1>
-        <p style={{ color: '#64748b', marginBottom: '24px', fontSize: '0.9rem' }}>請選擇角色並登入</p>
+    <div className="login-page-wrap">
+      <div className="login-card">
+        <h1 className="login-title">飯店入場管理系統</h1>
+        <p className="login-subtitle">
+          {contextLabel ? `您正在登入：${contextLabel}` : '請選擇角色並登入'}
+        </p>
 
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>
+        <div className="login-role-selector">
           {(['partner', 'admin'] as AuthRole[]).map((r) => (
             <button
               key={r}
               type="button"
               onClick={() => setRole(r)}
-              style={{
-                flex: 1,
-                padding: '8px',
-                borderRadius: '8px',
-                border: '1px solid',
-                borderColor: role === r ? '#6366f1' : '#e2e8f0',
-                background: role === r ? '#eef2ff' : '#fff',
-                color: role === r ? '#6366f1' : '#64748b',
-                cursor: 'pointer',
-                fontWeight: role === r ? 600 : 400,
-              }}
+              className={`login-role-btn ${role === r ? 'active' : ''}`}
             >
               {r === 'partner' ? '合作飯店' : '管理後台'}
             </button>
           ))}
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div>
-            <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', color: '#374151' }}>帳號</label>
+        <form onSubmit={handleSubmit} className="login-form">
+          <div className="login-field">
+            <label className="login-label">帳號</label>
             <input
               type="text"
+              className="login-input"
               value={account}
               onChange={(e) => setAccount(e.target.value)}
               required
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                borderRadius: '8px',
-                border: '1px solid #e2e8f0',
-                fontSize: '0.95rem',
-                boxSizing: 'border-box',
-              }}
             />
           </div>
-          <div>
-            <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', color: '#374151' }}>密碼</label>
+          <div className="login-field">
+            <label className="login-label">密碼</label>
             <input
               type="password"
+              className="login-input"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                borderRadius: '8px',
-                border: '1px solid #e2e8f0',
-                fontSize: '0.95rem',
-                boxSizing: 'border-box',
-              }}
             />
           </div>
 
           {error && (
-            <p style={{ color: '#dc2626', fontSize: '0.875rem', margin: 0 }}>{error}</p>
+            <p className="login-error">{error}</p>
           )}
 
           <button
             type="submit"
+            className="login-submit"
             disabled={loading}
-            style={{
-              padding: '10px',
-              borderRadius: '8px',
-              border: 'none',
-              background: '#6366f1',
-              color: '#fff',
-              fontSize: '1rem',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              opacity: loading ? 0.7 : 1,
-            }}
           >
-            {loading ? '登入中...' : '登入'}
+            {loading ? '登入中...' : '登入系統'}
           </button>
         </form>
       </div>

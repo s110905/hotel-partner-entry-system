@@ -1,4 +1,4 @@
-﻿import type { QrRecord } from '../types/qr'
+import type { QrRecord } from '../types/qr'
 
 export const STORAGE_KEY = 'hotel-partner-entry-qr-demo'
 
@@ -32,7 +32,7 @@ export function saveRecords(records: QrRecord[]) {
 export function createQrRecord(partnerName: string, totalQuota: number): QrRecord {
   const now = new Date()
   const expiresAt = new Date(now)
-  expiresAt.setMonth(expiresAt.getMonth() + 1)
+  expiresAt.setDate(expiresAt.getDate() + 7)
   const slug = partnerName
     .replace(/\s+/g, '-')
     .replace(/[^\p{L}\p{N}-]/gu, '')

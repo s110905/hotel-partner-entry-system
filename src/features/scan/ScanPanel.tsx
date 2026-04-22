@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Camera } from 'lucide-react'
 import type { QrLifecycleStatus, QrRecord } from '../../types/qr'
 import { canRedeem, computeStatus } from '../../utils/status'
 import { CameraScanner } from './components/CameraScanner'
@@ -139,7 +140,7 @@ export function ScanPanel({ records, onRedeem }: Props) {
               autoComplete="off"
             />
             <button type="button" className="scan-btn-camera" onClick={() => setStep('scanning')}>
-              📷 相機掃描
+              <Camera size={18} /> 相機掃描
             </button>
           </div>
 
@@ -270,22 +271,27 @@ export function ScanPanel({ records, onRedeem }: Props) {
                 本次已核銷 <strong>{amount}</strong> 人<br />
                 剩餘可用名額：<strong>{selected.remainingQuota}</strong> 人
               </p>
-              <div className="scan-quota-grid" style={{ maxWidth: 320, margin: '16px auto 0' }}>
-                <div className="scan-quota-cell">
-                  <div className="scan-quota-label">總名額</div>
-                  <div className="scan-quota-value">{selected.totalQuota}</div>
-                </div>
-                <div className="scan-quota-cell">
-                  <div className="scan-quota-label">已使用</div>
-                  <div className="scan-quota-value">{selected.usedQuota}</div>
-                </div>
-                <div className="scan-quota-cell">
-                  <div className="scan-quota-label">剩餘</div>
-                  <div className={`scan-quota-value ${selected.remainingQuota === 0 ? 'scan-quota-zero' : ''}`}>
-                    {selected.remainingQuota}
+                <div className="scan-quota-grid" style={{ maxWidth: 320, margin: '16px auto 0' }}>
+                  <div className="scan-quota-cell">
+                    <div className="scan-quota-label">總名額</div>
+                    <div className="scan-quota-value">{selected.totalQuota}</div>
+                  </div>
+                  <div className="scan-quota-cell">
+                    <div className="scan-quota-label">已使用</div>
+                    <div className="scan-quota-value">{selected.usedQuota}</div>
+                  </div>
+                  <div className="scan-quota-cell">
+                    <div className="scan-quota-label">剩餘</div>
+                    <div className={`scan-quota-value ${selected.remainingQuota === 0 ? 'scan-quota-zero' : ''}`}>
+                      {selected.remainingQuota}
+                    </div>
                   </div>
                 </div>
-              </div>
+                {selected.remainingQuota === 0 && (
+                  <div className="scan-zero-quota-warning">
+                    憑證已全數使用完畢
+                  </div>
+                )}
             </>
           ) : (
             <>

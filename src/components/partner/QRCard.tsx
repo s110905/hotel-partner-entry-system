@@ -117,7 +117,7 @@ export function QRCard({ record, compact = false, onIncrementDownload }: QRCardP
           <h4>{record.partnerName}</h4>
           <div className="qr-card-meta">
             <span className={`qr-status-pill qr-status-${style.tone}`}>{style.label}</span>
-            <span className="qr-code-chip">
+            <span className="qr-code-chip" title={record.code}>
               <Hash size={12} />
               {shortCode}
             </span>

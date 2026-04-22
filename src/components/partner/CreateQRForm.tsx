@@ -90,7 +90,7 @@ export function CreateQRForm({ onAdd }: CreateQRFormProps) {
         </div>
         <div>
           <h3>建立新憑證</h3>
-          <p>輸入合作飯店名稱與可用人數，系統將自動建立 1 個月有效的 QR 憑證。</p>
+          <p>輸入合作飯店名稱與可用人數，系統將自動建立 7 天有效的 QR 憑證。</p>
         </div>
       </div>
 
