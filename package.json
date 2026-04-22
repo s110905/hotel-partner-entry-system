@@ -13,6 +13,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.104.0",
     "@types/qrcode": "^1.5.6",
+    "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
     "jsqr": "^1.4.0",
@@ -24,6 +25,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
+    "@types/bcryptjs": "^2.4.6",
     "@types/node": "^24.12.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",

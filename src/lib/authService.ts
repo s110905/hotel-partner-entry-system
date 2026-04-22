@@ -9,30 +9,25 @@ export type AuthSession = {
   account: string
 }
 
+async function loginViaEdgeFunction(
+  account: string,
+  password: string,
+  role: AuthRole
+): Promise<AuthSession> {
+  const { data, error } = await supabase.functions.invoke('login', {
+    body: { account, password, role },
+  })
+
+  if (error) throw new Error('登入失敗，請稍後再試')
+  if (data?.error) throw new Error(data.error)
+
+  return { ...data, role } as AuthSession
+}
+
 export async function loginPartner(account: string, password: string): Promise<AuthSession> {
-  const { data, error } = await supabase
-    .from('partners')
-    .select('id, name, account, password_hash, status')
-    .eq('account', account)
-    .single()
-
-  if (error || !data) throw new Error('帳號不存在')
-  if (data.status !== 'active') throw new Error('此帳號已停用')
-  if (data.password_hash !== password) throw new Error('密碼錯誤')
-
-  return { role: 'partner', id: data.id, name: data.name, account: data.account }
+  return loginViaEdgeFunction(account, password, 'partner')
 }
 
 export async function loginAdmin(account: string, password: string): Promise<AuthSession> {
-  const { data, error } = await supabase
-    .from('admin_users')
-    .select('id, name, account, password_hash, status')
-    .eq('account', account)
-    .single()
-
-  if (error || !data) throw new Error('帳號不存在')
-  if (data.status !== 'active') throw new Error('此帳號已停用')
-  if (data.password_hash !== password) throw new Error('密碼錯誤')
-
-  return { role: 'admin', id: data.id, name: data.name, account: data.account }
+  return loginViaEdgeFunction(account, password, 'admin')
 }
