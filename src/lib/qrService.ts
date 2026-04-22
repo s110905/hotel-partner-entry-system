@@ -99,45 +99,26 @@ export async function redeemQr(
   amount: number,
   currentRecord: QrRecord
 ): Promise<QrRecord> {
-  const newUsed = currentRecord.usedQuota + amount
-  const newRemaining = currentRecord.remainingQuota - amount
-  const newStatus = newRemaining <= 0 ? 'used_up' : newUsed > 0 ? 'partial_used' : 'active'
+  const { data, error } = await supabase.rpc('redeem_qr', {
+    p_qr_code_id: id,
+    p_amount: amount,
+    p_partner_id: '00000000-0000-0000-0000-000000000001',
+    p_redeemed_by: null,
+  })
 
-  const [updateResult, redemptionResult] = await Promise.all([
-    supabase
-      .from('qr_codes')
-      .update({
-        used_quota: newUsed,
-        remaining_quota: newRemaining,
-        status: newStatus,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', id),
-    supabase
-      .from('qr_redemptions')
-      .insert({
-        qr_code_id: id,
-        partner_id: DEMO_PARTNER_ID,
-        redeemed_quota: amount,
-        redeemed_at: new Date().toISOString(),
-      })
-      .select()
-      .single(),
-  ])
-
-  if (updateResult.error) throw updateResult.error
-  if (redemptionResult.error) throw redemptionResult.error
+  if (error) throw new Error('核銷失敗，請確認網路連線或稍後再試。')
+  if (!data.ok) throw new Error(data.reason)
 
   const newRedemption: RedemptionRecord = {
-    id: (redemptionResult.data as Record<string, unknown>).id as string,
+    id: data.redemption_id as string,
     redeemedQuota: amount,
-    redeemedAt: (redemptionResult.data as Record<string, unknown>).redeemed_at as string,
+    redeemedAt: new Date().toISOString(),
   }
 
   return {
     ...currentRecord,
-    usedQuota: newUsed,
-    remainingQuota: newRemaining,
+    usedQuota: data.used_quota as number,
+    remainingQuota: data.remaining_quota as number,
     redemptions: [...currentRecord.redemptions, newRedemption],
   }
 }
