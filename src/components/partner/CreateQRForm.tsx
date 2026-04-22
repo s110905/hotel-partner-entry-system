@@ -50,7 +50,6 @@ export function CreateQRForm({ partnerName, onAdd }: CreateQRFormProps) {
         </div>
         <div>
           <h3>建立新憑證</h3>
-          <p>輸入可用人數，系統將自動為 {partnerName} 建立 7 天有效的 QR 憑證。</p>
         </div>
       </div>
 
