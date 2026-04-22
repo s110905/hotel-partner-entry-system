@@ -1,0 +1,152 @@
+import { supabase } from './supabase'
+import type { QrRecord, RedemptionRecord } from '../types/qr'
+
+const DEMO_PARTNER_ID = '00000000-0000-0000-0000-000000000001'
+
+function toQrRecord(row: Record<string, unknown>): QrRecord {
+  const redemptions = Array.isArray(row.qr_redemptions)
+    ? (row.qr_redemptions as Record<string, unknown>[]).map((r) => ({
+        id: r.id as string,
+        redeemedQuota: r.redeemed_quota as number,
+        redeemedAt: r.redeemed_at as string,
+      }))
+    : []
+
+  return {
+    id: row.id as string,
+    code: row.code as string,
+    partnerName: (row.partners as Record<string, unknown>)?.name as string ?? 'Demo 飯店',
+    totalQuota: row.total_quota as number,
+    usedQuota: row.used_quota as number,
+    remainingQuota: row.remaining_quota as number,
+    downloadCount: row.download_count as number,
+    createdAt: row.created_at as string,
+    expiresAt: row.expires_at as string,
+    disabled: row.disabled as boolean,
+    redemptions,
+  }
+}
+
+export async function fetchRecords(): Promise<QrRecord[]> {
+  const { data, error } = await supabase
+    .from('qr_codes')
+    .select('*, partners(name), qr_redemptions(*)')
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  return (data ?? []).map(toQrRecord)
+}
+
+export async function insertQrRecord(
+  partnerName: string,
+  totalQuota: number
+): Promise<QrRecord> {
+  const now = new Date()
+  const expiresAt = new Date(now)
+  expiresAt.setDate(expiresAt.getDate() + 7)
+
+  const slug = partnerName
+    .replace(/\s+/g, '-')
+    .replace(/[^\p{L}\p{N}-]/gu, '')
+    .toUpperCase()
+    .slice(0, 12)
+
+  const code = `HPES-${slug || 'PARTNER'}-${Date.now()}`
+
+  const { data, error } = await supabase
+    .from('qr_codes')
+    .insert({
+      partner_id: DEMO_PARTNER_ID,
+      code,
+      total_quota: totalQuota,
+      used_quota: 0,
+      remaining_quota: totalQuota,
+      download_count: 0,
+      status: 'active',
+      disabled: false,
+      issued_at: now.toISOString(),
+      expires_at: expiresAt.toISOString(),
+    })
+    .select('*, partners(name), qr_redemptions(*)')
+    .single()
+
+  if (error) throw error
+  return toQrRecord(data)
+}
+
+export async function incrementDownload(id: string): Promise<void> {
+  const { error } = await supabase.rpc('increment_download', { qr_id: id })
+  if (error) {
+    // Fallback if RPC is not defined
+    await supabase
+      .from('qr_codes')
+      .select('download_count')
+      .eq('id', id)
+      .single()
+      .then(async ({ data }) => {
+        if (data) {
+          await supabase
+            .from('qr_codes')
+            .update({ download_count: (data.download_count as number) + 1 })
+            .eq('id', id)
+        }
+      })
+  }
+}
+
+export async function redeemQr(
+  id: string,
+  amount: number,
+  currentRecord: QrRecord
+): Promise<QrRecord> {
+  const newUsed = currentRecord.usedQuota + amount
+  const newRemaining = currentRecord.remainingQuota - amount
+  const newStatus = newRemaining <= 0 ? 'used_up' : newUsed > 0 ? 'partial_used' : 'active'
+
+  const [updateResult, redemptionResult] = await Promise.all([
+    supabase
+      .from('qr_codes')
+      .update({
+        used_quota: newUsed,
+        remaining_quota: newRemaining,
+        status: newStatus,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', id),
+    supabase
+      .from('qr_redemptions')
+      .insert({
+        qr_code_id: id,
+        partner_id: DEMO_PARTNER_ID,
+        redeemed_quota: amount,
+        redeemed_at: new Date().toISOString(),
+      })
+      .select()
+      .single(),
+  ])
+
+  if (updateResult.error) throw updateResult.error
+  if (redemptionResult.error) throw redemptionResult.error
+
+  const newRedemption: RedemptionRecord = {
+    id: (redemptionResult.data as Record<string, unknown>).id as string,
+    redeemedQuota: amount,
+    redeemedAt: (redemptionResult.data as Record<string, unknown>).redeemed_at as string,
+  }
+
+  return {
+    ...currentRecord,
+    usedQuota: newUsed,
+    remainingQuota: newRemaining,
+    redemptions: [...currentRecord.redemptions, newRedemption],
+  }
+}
+
+export async function toggleDisable(id: string, disabled: boolean): Promise<void> {
+  const { error } = await supabase
+    .from('qr_codes')
+    .update({ disabled, updated_at: new Date().toISOString() })
+    .eq('id', id)
+
+  if (error) throw error
+}
