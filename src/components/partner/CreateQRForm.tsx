@@ -59,8 +59,8 @@ export function CreateQRForm({ onAdd }: CreateQRFormProps) {
       return
     }
 
-    if (quota < 1 || quota > 100) {
-      setError('可用名額請設定在 1 到 100 之間。')
+    if (quota < 1 || quota > 10) {
+      setError('可用名額請設定在 1 到 10 之間。')
       return
     }
 
@@ -169,7 +169,7 @@ export function CreateQRForm({ onAdd }: CreateQRFormProps) {
                   <input
                     type="range"
                     min="1"
-                    max="100"
+                    max="10"
                     value={quota}
                     onChange={(event) => setQuota(Number.parseInt(event.target.value, 10))}
                     disabled={isSubmitting}
@@ -177,11 +177,11 @@ export function CreateQRForm({ onAdd }: CreateQRFormProps) {
                   <input
                     type="number"
                     min="1"
-                    max="100"
+                    max="10"
                     value={quota}
                     onChange={(event) => {
                       const v = Number.parseInt(event.target.value, 10)
-                      setQuota(isNaN(v) ? 1 : Math.max(1, Math.min(100, v)))
+                      setQuota(isNaN(v) ? 1 : Math.max(1, Math.min(10, v)))
                     }}
                     onBlur={() => {
                       if (!quota) setQuota(1)
@@ -190,7 +190,7 @@ export function CreateQRForm({ onAdd }: CreateQRFormProps) {
                     className="create-form-number"
                   />
                 </div>
-                <small>每次發放上限為 100 人。</small>
+                <small>每次發放上限為 10 人。</small>
               </label>
 
               <AnimatePresence>

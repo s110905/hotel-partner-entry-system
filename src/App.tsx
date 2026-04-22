@@ -130,35 +130,17 @@ function App() {
   // ── Render: Authenticated Shell ────────────────────────
   return (
     <div className="app-shell">
-      <header className="hero-panel">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <div>
-            <p className="eyebrow">展示系統</p>
-            <h1>飯店合作夥伴入場管理系統</h1>
-            <p className="hero-copy">
-              歡迎使用 QR First 入場管理系統。本系統提供合作飯店專屬憑證發放、現場快速掃碼核銷與即時使用狀態追蹤功能。
-            </p>
-          </div>
-          <div className="user-status" style={{ background: 'rgba(255,255,255,0.2)', padding: '12px 18px', borderRadius: 12, backdropFilter: 'blur(8px)' }}>
-            <span className="user-info" style={{ color: '#fff', fontWeight: 700, marginRight: 12 }}>
-              {session.name} ({session.role === 'admin' ? '管理員' : '合作夥伴'})
-            </span>
-            <button className="logout-btn" onClick={handleLogout} style={{ background: '#fff', color: '#d45c2f', border: 'none', padding: '6px 12px', borderRadius: 8, fontWeight: 700, cursor: 'pointer' }}>
-              登出
-            </button>
-          </div>
+      <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', background: '#fff', borderBottom: '1px solid #eee' }}>
+        <h1 style={{ margin: 0, fontSize: '1.25rem', color: '#3b2a21', fontWeight: 800 }}>飯店合作夥伴管理系統</h1>
+        <div className="user-status" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span className="user-info" style={{ color: '#3b2a21', fontWeight: 700 }}>
+            {session.name} ({session.role === 'admin' ? '管理員' : '合作夥伴'})
+          </span>
+          <button className="logout-btn" onClick={handleLogout} style={{ background: '#d45c2f', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: 8, fontWeight: 700, cursor: 'pointer' }}>
+            登出
+          </button>
         </div>
-        <div className="hero-badges">
-          <span>7 天有效期</span>
-          <span>多人額度</span>
-          <span>可分次核銷</span>
-        </div>
-      </header>
-
-      <section className="notice-bar">
-        <strong>系統公告</strong>
-        <span>資料已儲存至 Supabase 雲端資料庫，可跨裝置使用。</span>
-      </section>
+      </nav>
 
       {session.role === 'partner' && (
         <PartnerPanel

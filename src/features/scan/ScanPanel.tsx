@@ -111,7 +111,7 @@ export function ScanPanel({ records, onRedeem, isUnlocked, onUnlock, onBack }: P
 
   function handlePinSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (pin === '1234') {
+    if (pin === '9999') {
       onUnlock()
       setPin('')
       setPinError('')
