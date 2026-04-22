@@ -10,6 +10,7 @@ type Props = {
   onRedeem: (id: string, amount: number) => Promise<void>
   isUnlocked: boolean
   onUnlock: () => void
+  onBack: () => void
 }
 
 type Step = 'idle' | 'scanning' | 'found' | 'done'
@@ -31,7 +32,7 @@ function fmtDate(iso: string) {
   })
 }
 
-export function ScanPanel({ records, onRedeem, isUnlocked, onUnlock }: Props) {
+export function ScanPanel({ records, onRedeem, isUnlocked, onUnlock, onBack }: Props) {
   const [pin, setPin] = useState('')
   const [pinError, setPinError] = useState('')
   const [step, setStep] = useState<Step>('idle')
@@ -171,10 +172,15 @@ export function ScanPanel({ records, onRedeem, isUnlocked, onUnlock }: Props) {
       {/* ── Idle: pick or scan ─────────────────────────── */}
       {step === 'idle' && (
         <>
-          <div className="panel-heading">
-            <h2>掃碼核銷</h2>
-            <p>選取既有 QR，或開啟相機掃描客人的 QR 碼</p>
-          </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h2>掃碼核銷</h2>
+                <p>選取既有 QR，或開啟相機掃描客人的 QR 碼</p>
+              </div>
+              <button type="button" className="scan-btn-back" style={{ textDecoration: 'none', border: '1px solid #e2e8f0', padding: '6px 12px', borderRadius: 8 }} onClick={onBack}>
+                返回登入頁
+              </button>
+            </div>
 
           <div className="scan-search-row">
             <input

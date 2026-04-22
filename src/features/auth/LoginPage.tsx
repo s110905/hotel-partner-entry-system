@@ -5,11 +5,12 @@ import './LoginPage.css'
 
 type Props = {
   onLogin: (session: AuthSession) => void
+  onScanMode: () => void
   defaultRole?: AuthRole
   contextLabel?: string
 }
 
-export function LoginPage({ onLogin, defaultRole = 'partner', contextLabel }: Props) {
+export function LoginPage({ onLogin, onScanMode, defaultRole = 'partner', contextLabel }: Props) {
   const [role, setRole] = useState<AuthRole>(defaultRole)
   const [account, setAccount] = useState('')
   const [password, setPassword] = useState('')
@@ -105,6 +106,17 @@ export function LoginPage({ onLogin, defaultRole = 'partner', contextLabel }: Pr
           >
             {loading ? '登入中...' : '登入系統'}
           </button>
+
+          <div style={{ marginTop: 20, borderTop: '1px solid #eee', paddingTop: 20, textAlign: 'center' }}>
+            <button
+              type="button"
+              className="btn-secondary"
+              style={{ width: '100%', background: 'transparent', border: '2px solid #d45c2f', color: '#d45c2f' }}
+              onClick={onScanMode}
+            >
+              進入現場核銷入口
+            </button>
+          </div>
         </form>
       </div>
     </div>

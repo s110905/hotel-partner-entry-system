@@ -9,10 +9,8 @@ import type { AuthSession } from './lib/authService'
 import type { PartnerSummary, QrRecord } from './types/qr'
 import { computeStatus } from './utils/status'
 
-type ViewKey = 'partner' | 'scan' | 'admin'
-
 function App() {
-  const [view, setView] = useState<ViewKey>('partner')
+  const [scanMode, setScanMode] = useState(false)
   const [session, setSession] = useState<AuthSession | null>(null)
   const [records, setRecords] = useState<QrRecord[]>([])
   const [loading, setLoading] = useState(true)
@@ -53,20 +51,6 @@ function App() {
     setRecords((prev) =>
       prev.map((r) => (r.id === id ? { ...r, downloadCount: r.downloadCount + 1 } : r))
     )
-  }
-
-  const handleViewChange = (newView: ViewKey) => {
-    if (newView === view) return
-    setView(newView)
-    
-    // Reset scan lock when leaving scan view
-    if (view === 'scan' && newView !== 'scan') {
-      setScanUnlocked(false)
-    }
-
-    if (newView === 'scan') return
-    if (session && (session.role as string) === newView) return
-    setSession(null)
   }
 
   const handleLogout = () => {
@@ -115,95 +99,76 @@ function App() {
     )
   }
 
-  const needsAuth = (view === 'partner' && (!session || session.role !== 'partner')) ||
-                   (view === 'admin' && (!session || session.role !== 'admin'))
-
-  if (needsAuth) {
+  // ── Render: Scan Mode ─────────────────────────────────
+  if (scanMode) {
     return (
       <div className="app-shell">
-        <nav className="tab-bar-container">
-          <div className="tab-bar" aria-label="主要區塊">
-            <button className={view === 'partner' ? 'active' : ''} onClick={() => handleViewChange('partner')} type="button">
-              發放憑證 (Partner)
-            </button>
-            <button className={(view as any) === 'scan' ? 'active' : ''} onClick={() => handleViewChange('scan')} type="button">
-              現場核銷 (Scan)
-            </button>
-            <button className={view === 'admin' ? 'active' : ''} onClick={() => handleViewChange('admin')} type="button">
-              管理後台 (Admin)
-            </button>
-          </div>
-        </nav>
-        <LoginPage
-          onLogin={setSession}
-          defaultRole={view === 'admin' ? 'admin' : 'partner'}
-          contextLabel={view === 'admin' ? '管理後台（系統管理員）' : '發放憑證（合作飯店）'}
+        <ScanPanel 
+          records={records} 
+          onRedeem={handleRedeem} 
+          isUnlocked={scanUnlocked}
+          onUnlock={() => setScanUnlocked(true)}
+          onBack={() => setScanMode(false)}
         />
       </div>
     )
   }
 
+  // ── Render: Login ─────────────────────────────────────
+  if (!session) {
+    return (
+      <div className="app-shell">
+        <LoginPage
+          onLogin={setSession}
+          onScanMode={() => setScanMode(true)}
+          defaultRole="partner"
+        />
+      </div>
+    )
+  }
+
+  // ── Render: Authenticated Shell ────────────────────────
   return (
     <div className="app-shell">
-      {view !== 'scan' && (
-        <header className="hero-panel">
+      <header className="hero-panel">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
             <p className="eyebrow">展示系統</p>
             <h1>飯店合作夥伴入場管理系統</h1>
             <p className="hero-copy">
-              歡迎使用 QR First 入場管理系統。本系統提供合作飯店專屬憑證發放、現場快速掃碼核銷與即時使用狀態追蹤功能，確保入場流程順暢安全。
+              歡迎使用 QR First 入場管理系統。本系統提供合作飯店專屬憑證發放、現場快速掃碼核銷與即時使用狀態追蹤功能。
             </p>
           </div>
-          <div className="hero-badges">
-            <span>7 天有效期</span>
-            <span>多人額度</span>
-            <span>可分次核銷</span>
+          <div className="user-status" style={{ background: 'rgba(255,255,255,0.2)', padding: '12px 18px', borderRadius: 12, backdropFilter: 'blur(8px)' }}>
+            <span className="user-info" style={{ color: '#fff', fontWeight: 700, marginRight: 12 }}>
+              {session.name} ({session.role === 'admin' ? '管理員' : '合作夥伴'})
+            </span>
+            <button className="logout-btn" onClick={handleLogout} style={{ background: '#fff', color: '#d45c2f', border: 'none', padding: '6px 12px', borderRadius: 8, fontWeight: 700, cursor: 'pointer' }}>
+              登出
+            </button>
           </div>
-        </header>
-      )}
-
-      <nav className="tab-bar-container">
-        <div className="tab-bar" aria-label="主要區塊">
-          <button className={view === 'partner' ? 'active' : ''} onClick={() => handleViewChange('partner')} type="button">
-            發放憑證 (Partner)
-          </button>
-          <button className={(view as any) === 'scan' ? 'active' : ''} onClick={() => handleViewChange('scan')} type="button">
-            現場核銷 (Scan)
-          </button>
-          <button className={view === 'admin' ? 'active' : ''} onClick={() => handleViewChange('admin')} type="button">
-            管理後台 (Admin)
-          </button>
         </div>
-        
-        {session && (
-          <div className="user-status">
-            <span className="user-info">{session.name} ({session.role})</span>
-            <button className="logout-btn" onClick={handleLogout}>登出</button>
-          </div>
-        )}
-      </nav>
+        <div className="hero-badges">
+          <span>7 天有效期</span>
+          <span>多人額度</span>
+          <span>可分次核銷</span>
+        </div>
+      </header>
 
       <section className="notice-bar">
         <strong>系統公告</strong>
         <span>資料已儲存至 Supabase 雲端資料庫，可跨裝置使用。</span>
       </section>
 
-      {view === 'partner' && (
+      {session.role === 'partner' && (
         <PartnerPanel
           records={records}
           onAdd={handleAddRecord}
           onIncrementDownload={handleIncrementDownload}
         />
       )}
-      {view === 'scan' && (
-        <ScanPanel 
-          records={records} 
-          onRedeem={handleRedeem} 
-          isUnlocked={scanUnlocked}
-          onUnlock={() => setScanUnlocked(true)}
-        />
-      )}
-      {view === 'admin' && (
+      
+      {session.role === 'admin' && (
         <AdminPanel
           partnerSummaries={partnerSummaries}
           records={records}
