@@ -1,4 +1,5 @@
 import { Fragment, useState } from 'react'
+import { supabase } from '../../lib/supabase'
 import type { QrLifecycleStatus, PartnerSummary, QrRecord } from '../../types/qr'
 import { computeStatus } from '../../utils/status'
 import './AdminPanel.css'
@@ -51,6 +52,10 @@ export function AdminPanel({ partnerSummaries, records, onToggleDisable }: Props
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   type ActionMsg = { text: string; type: 'success' | 'error' } | null
   const [actionMessage, setActionMessage] = useState<ActionMsg>(null)
+  const [showAddPartner, setShowAddPartner] = useState(false)
+  const [newPartnerName, setNewPartnerName] = useState('')
+  const [newPartnerAccount, setNewPartnerAccount] = useState('')
+  const [isCreating, setIsCreating] = useState(false)
 
   // ── Summary totals ─────────────────────────────────────
   const totals = partnerSummaries.reduce(
@@ -113,6 +118,37 @@ export function AdminPanel({ partnerSummaries, records, onToggleDisable }: Props
     }
   }
 
+  async function handleCreatePartner(e: React.FormEvent) {
+    e.preventDefault()
+    if (!newPartnerName.trim() || !newPartnerAccount.trim()) {
+      setActionMessage({ text: '請輸入名稱與帳號。', type: 'error' })
+      return
+    }
+
+    setIsCreating(true)
+    try {
+      const { data, error } = await supabase.functions.invoke('create-partner', {
+        body: { name: newPartnerName.trim(), account: newPartnerAccount.trim() },
+      })
+
+      if (error) throw error
+      if (data.error) throw new Error(data.error)
+
+      setActionMessage({ text: `${newPartnerName} 已新增，預設密碼：1234`, type: 'success' })
+      setNewPartnerName('')
+      setNewPartnerAccount('')
+      setShowAddPartner(false)
+      // Note: Data refresh usually happens via records state in App.tsx
+      // But adding a partner doesn't change records. 
+      // It just creates a user.
+    } catch (err) {
+      setActionMessage({ text: err instanceof Error ? err.message : '建立失敗', type: 'error' })
+    } finally {
+      setIsCreating(false)
+      setTimeout(() => setActionMessage(null), 5000)
+    }
+  }
+
   // deleteRecord removed as it is not supported in the current service layer
 
   // ── Render ─────────────────────────────────────────────
@@ -161,7 +197,41 @@ export function AdminPanel({ partnerSummaries, records, onToggleDisable }: Props
 
       {/* ── Tab: Partner Stats ─────────────────────────── */}
       {tab === 'partners' && (
-        <div className="admin-table-wrap">
+        <div className="admin-content-card">
+          <div className="admin-toolbar">
+            <button type="button" className="btn-primary" onClick={() => setShowAddPartner(!showAddPartner)}>
+              {showAddPartner ? '取消新增' : '新增合作夥伴'}
+            </button>
+          </div>
+
+          {showAddPartner && (
+            <div className="admin-inline-form">
+              <p className="admin-form-hint">預設密碼為 1234，合作夥伴登入後可自行修改。</p>
+              <form onSubmit={handleCreatePartner} className="admin-form">
+                <input
+                  type="text"
+                  placeholder="飯店/夥伴名稱"
+                  value={newPartnerName}
+                  onChange={e => setNewPartnerName(e.target.value)}
+                  className="admin-form-input"
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="登入帳號"
+                  value={newPartnerAccount}
+                  onChange={e => setNewPartnerAccount(e.target.value)}
+                  className="admin-form-input"
+                  required
+                />
+                <button type="submit" className="btn-primary" disabled={isCreating}>
+                  {isCreating ? '建立中...' : '確認建立'}
+                </button>
+              </form>
+            </div>
+          )}
+
+          <div className="admin-table-wrap">
           <table className="admin-table">
             <thead>
               <tr>
@@ -198,6 +268,7 @@ export function AdminPanel({ partnerSummaries, records, onToggleDisable }: Props
             </tbody>
           </table>
         </div>
+      </div>
       )}
 
       {/* ── Tab: QR Detail ────────────────────────────── */}

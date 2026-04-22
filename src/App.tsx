@@ -5,6 +5,7 @@ import { AdminPanel } from './features/admin/AdminPanel'
 import { PartnerPanel } from './features/partner/PartnerPanel'
 import { ScanPanel } from './features/scan/ScanPanel'
 import { LoginPage } from './features/auth/LoginPage'
+import { ChangePasswordModal } from './features/auth/ChangePasswordModal'
 import type { AuthSession } from './lib/authService'
 import type { PartnerSummary, QrRecord } from './types/qr'
 import { computeStatus } from './utils/status'
@@ -16,6 +17,7 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [scanUnlocked, setScanUnlocked] = useState(false)
+  const [showChangePassword, setShowChangePassword] = useState(false)
 
   useEffect(() => {
     fetchRecords()
@@ -136,6 +138,9 @@ function App() {
           <span className="user-info" style={{ color: '#3b2a21', fontWeight: 700 }}>
             {session.name} ({session.role === 'admin' ? '管理員' : '合作夥伴'})
           </span>
+          <button className="logout-btn" onClick={() => setShowChangePassword(true)} style={{ background: 'transparent', color: '#d45c2f', border: '1px solid #d45c2f', padding: '6px 12px', borderRadius: 8, fontWeight: 700, cursor: 'pointer' }}>
+            修改密碼
+          </button>
           <button className="logout-btn" onClick={handleLogout} style={{ background: '#d45c2f', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: 8, fontWeight: 700, cursor: 'pointer' }}>
             登出
           </button>
@@ -155,6 +160,13 @@ function App() {
           partnerSummaries={partnerSummaries}
           records={records}
           onToggleDisable={handleToggleDisable}
+        />
+      )}
+
+      {showChangePassword && (
+        <ChangePasswordModal
+          session={session}
+          onClose={() => setShowChangePassword(false)}
         />
       )}
     </div>

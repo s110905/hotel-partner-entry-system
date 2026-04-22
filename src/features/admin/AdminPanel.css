@@ -270,6 +270,62 @@
 .admin-status-expired      { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
 .admin-status-disabled     { background: #f1f5f9; color: #94a3b8; border-color: #e2e8f0; text-decoration: line-through; }
 
+.admin-content-card {
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.admin-toolbar {
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.4);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.admin-inline-form {
+  padding: 20px;
+  background: #fff;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  animation: slideDown 0.3s ease-out;
+}
+
+.admin-form-hint {
+  margin: 0 0 12px 0;
+  font-size: 0.85rem;
+  color: #d45c2f;
+  font-weight: 600;
+}
+
+.admin-form {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-form-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 10px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.admin-form-input:focus {
+  border-color: #d45c2f;
+  box-shadow: 0 0 0 3px rgba(212, 92, 47, 0.1);
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @media (max-width: 640px) {
   .admin-summary-grid {
     grid-template-columns: 1fr;
