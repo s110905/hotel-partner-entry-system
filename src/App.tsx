@@ -20,11 +20,20 @@ function App() {
   const [showChangePassword, setShowChangePassword] = useState(false)
 
   useEffect(() => {
-    fetchRecords()
+    if (!session && !scanMode) {
+      setRecords([])
+      setLoading(false)
+      return
+    }
+
+    const partnerId = session?.role === 'partner' ? session.id : undefined
+
+    setLoading(true)
+    fetchRecords(partnerId)
       .then(setRecords)
       .catch(() => setError('無法載入資料，請確認 Supabase 連線設定。'))
       .finally(() => setLoading(false))
-  }, [])
+  }, [session, scanMode])
 
   const handleAddRecord = async (partnerName: string, totalQuota: number) => {
     const partnerId = session?.id ?? ''

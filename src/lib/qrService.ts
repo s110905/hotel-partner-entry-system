@@ -26,11 +26,17 @@ function toQrRecord(row: Record<string, unknown>): QrRecord {
   }
 }
 
-export async function fetchRecords(): Promise<QrRecord[]> {
-  const { data, error } = await supabase
+export async function fetchRecords(partnerId?: string): Promise<QrRecord[]> {
+  let query = supabase
     .from('qr_codes')
     .select('*, partners(name), qr_redemptions(*)')
     .order('created_at', { ascending: false })
+
+  if (partnerId) {
+    query = query.eq('partner_id', partnerId)
+  }
+
+  const { data, error } = await query
 
   if (error) throw error
   return (data ?? []).map(toQrRecord)
