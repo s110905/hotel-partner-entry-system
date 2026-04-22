@@ -1,4 +1,4 @@
-﻿.partner-panel {
+.partner-panel {
   display: grid;
   gap: 24px;
 }
@@ -12,7 +12,7 @@
 
 .partner-title {
   font-size: clamp(2.1rem, 4vw, 2.8rem);
-  color: #183153;
+  color: #5f3515;
   letter-spacing: -0.04em;
 }
 
@@ -69,8 +69,8 @@
 }
 
 .partner-stat-icon-indigo {
-  background: rgba(79, 70, 229, 0.12);
-  color: #4f46e5;
+  background: rgba(212, 92, 47, 0.12);
+  color: #d45c2f;
 }
 
 .partner-stat-icon-emerald {
@@ -112,7 +112,7 @@
 }
 
 .partner-progress-header strong {
-  color: #2563eb;
+  color: #d45c2f;
   font-size: 1.2rem;
 }
 
@@ -128,8 +128,8 @@
 .partner-progress-fill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  box-shadow: 0 0 18px rgba(59, 130, 246, 0.35);
+  background: linear-gradient(135deg, #d45c2f, #f2a33a);
+  box-shadow: 0 0 18px rgba(212, 92, 47, 0.35);
 }
 
 .partner-progress-note {
@@ -170,12 +170,12 @@
   justify-content: center;
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid rgba(15, 23, 42, 0.08);
-  color: #4f46e5;
+  color: #d45c2f;
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
 }
 
 .partner-list-heading h3 {
-  color: #183153;
+  color: #5f3515;
   font-size: 1.65rem;
   letter-spacing: -0.03em;
 }

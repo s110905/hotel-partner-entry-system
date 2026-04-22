@@ -127,17 +127,26 @@ export function QRList({ records, onIncrementDownload }: QRListProps) {
             <div className="partner-empty-icon">
               <Search size={32} />
             </div>
-            <h3>找不到符合條件的憑證</h3>
-            <p>請調整搜尋文字或篩選條件，重新查看目前的 QR 清單。</p>
-            <button
-              type="button"
-              onClick={() => {
-                setSearchTerm('')
-                setStatusFilter('all')
-              }}
-            >
-              清除搜尋與篩選
-            </button>
+            {records.length === 0 ? (
+              <>
+                <h3>尚無憑證資料</h3>
+                <p>目前尚未建立任何憑證，請使用左側表單建立第一張憑證。</p>
+              </>
+            ) : (
+              <>
+                <h3>找不到符合條件的憑證</h3>
+                <p>請調整搜尋文字或篩選條件，或點擊下方按鈕重置。</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchTerm('')
+                    setStatusFilter('all')
+                  }}
+                >
+                  清除搜尋與篩選
+                </button>
+              </>
+            )}
           </motion.div>
         ) : (
           <motion.div

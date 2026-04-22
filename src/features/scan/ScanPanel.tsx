@@ -35,13 +35,16 @@ export function ScanPanel({ records, onRedeem }: Props) {
   const [selected, setSelected] = useState<QrRecord | null>(null)
   const [amount, setAmount] = useState(1)
   const [outcome, setOutcome] = useState<Outcome | null>(null)
+  const [entryMode, setEntryMode] = useState<'camera' | 'manual'>('manual')
+  const [scanError, setScanError] = useState<string | null>(null)
 
   // ── Helpers ────────────────────────────────────────────
 
-  function selectRecord(record: QrRecord) {
+  function selectRecord(record: QrRecord, mode: 'camera' | 'manual' = 'manual') {
     setSelected(record)
     setAmount(1)
     setOutcome(null)
+    setEntryMode(mode)
     setStep('found')
   }
 
@@ -55,15 +58,18 @@ export function ScanPanel({ records, onRedeem }: Props) {
 
     const record = records.find(r => r.code === code)
     if (record) {
-      selectRecord(record)
+      selectRecord(record, 'camera')
     } else {
+      setScanError('找不到此 QR，請確認是否為有效憑證')
       setStep('idle')
+      setTimeout(() => setScanError(null), 3000)
     }
   }
 
   function handleAmountChange(v: number) {
     const max = selected?.remainingQuota ?? 1
-    setAmount(Math.min(max, Math.max(1, v)))
+    const val = isNaN(v) ? 1 : Math.min(max, Math.max(1, v))
+    setAmount(val)
   }
 
   async function handleRedeem() {
@@ -144,7 +150,17 @@ export function ScanPanel({ records, onRedeem }: Props) {
             </button>
           </div>
 
-          {filtered.length === 0 ? (
+          {scanError && (
+            <div className="scan-block-msg" style={{ marginTop: 12 }}>
+              {scanError}
+            </div>
+          )}
+
+          {records.length === 0 ? (
+            <div className="scan-block-msg" style={{ textAlign: 'center', background: '#fff3eb', color: '#8a3f18', borderColor: 'transparent', padding: '24px' }}>
+              目前系統尚無憑證資料，請先至「發放憑證」頁面建立憑證後再進行核銷。
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="scan-empty">找不到符合的憑證</div>
           ) : (
             <ul className="scan-qr-list">
@@ -254,7 +270,11 @@ export function ScanPanel({ records, onRedeem }: Props) {
             </div>
           )}
 
-          <button type="button" className="scan-btn-back" onClick={reset}>
+          <button
+            type="button"
+            className="scan-btn-back"
+            onClick={() => entryMode === 'camera' ? setStep('scanning') : reset()}
+          >
             返回上一頁
           </button>
         </>
@@ -300,9 +320,23 @@ export function ScanPanel({ records, onRedeem }: Props) {
               <p className="scan-result-err-msg">{outcome.reason}</p>
             </>
           )}
-          <button type="button" className="scan-btn-confirm" onClick={reset}>
-            繼續下一筆
-          </button>
+          <div style={{ display: 'grid', gap: 10 }}>
+            {!outcome.ok && (
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => {
+                  setStep('found')
+                  setOutcome(null)
+                }}
+              >
+                重試核銷
+              </button>
+            )}
+            <button type="button" className="scan-btn-confirm" onClick={() => entryMode === 'camera' ? setStep('scanning') : reset()}>
+              {outcome.ok ? '繼續核銷下一筆' : '放棄並返回'}
+            </button>
+          </div>
         </div>
       )}
 

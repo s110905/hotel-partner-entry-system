@@ -169,8 +169,8 @@ export function CreateQRForm({ onAdd }: CreateQRFormProps) {
                   <input
                     type="range"
                     min="1"
-                    max="20"
-                    value={Math.min(quota, 20)}
+                    max="100"
+                    value={quota}
                     onChange={(event) => setQuota(Number.parseInt(event.target.value, 10))}
                     disabled={isSubmitting}
                   />
@@ -179,12 +179,18 @@ export function CreateQRForm({ onAdd }: CreateQRFormProps) {
                     min="1"
                     max="100"
                     value={quota}
-                    onChange={(event) => setQuota(Number.parseInt(event.target.value, 10) || 1)}
+                    onChange={(event) => {
+                      const v = Number.parseInt(event.target.value, 10)
+                      setQuota(isNaN(v) ? 1 : Math.max(1, Math.min(100, v)))
+                    }}
+                    onBlur={() => {
+                      if (!quota) setQuota(1)
+                    }}
                     disabled={isSubmitting}
                     className="create-form-number"
                   />
                 </div>
-                <small>若要超過 20 人，可直接在右側輸入數字。</small>
+                <small>每次發放上限為 100 人。</small>
               </label>
 
               <AnimatePresence>

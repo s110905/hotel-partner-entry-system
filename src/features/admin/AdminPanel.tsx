@@ -36,7 +36,11 @@ function fmtDate(iso: string) {
 
 function fmtFull(iso: string) {
   return new Date(iso).toLocaleString('zh-TW', {
-    month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
   })
 }
 
@@ -45,7 +49,8 @@ export function AdminPanel({ partnerSummaries, records, onToggleDisable }: Props
   const [filterPartner, setFilterPartner] = useState('')
   const [filterStatus, setFilterStatus] = useState('')
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
-  const [actionMessage, setActionMessage] = useState('')
+  type ActionMsg = { text: string; type: 'success' | 'error' } | null
+  const [actionMessage, setActionMessage] = useState<ActionMsg>(null)
 
   // ── Summary totals ─────────────────────────────────────
   const totals = partnerSummaries.reduce(
@@ -100,11 +105,11 @@ export function AdminPanel({ partnerSummaries, records, onToggleDisable }: Props
       const successMsg = nextDisabled
         ? `已停用 ${record.partnerName} 的 QR。`
         : `已恢復 ${record.partnerName} 的 QR。`
-      setActionMessage(successMsg)
-      setTimeout(() => setActionMessage(''), 3000)
+      setActionMessage({ text: successMsg, type: 'success' })
+      setTimeout(() => setActionMessage(null), 3000)
     } catch (err) {
-      setActionMessage('操作失敗，請稍後再試。')
-      setTimeout(() => setActionMessage(''), 3000)
+      setActionMessage({ text: '操作失敗，請稍後再試。', type: 'error' })
+      setTimeout(() => setActionMessage(null), 3000)
     }
   }
 
@@ -121,7 +126,9 @@ export function AdminPanel({ partnerSummaries, records, onToggleDisable }: Props
           <p>憑證統計與現場核銷紀錄查詢</p>
         </div>
         {actionMessage ? (
-          <div className="admin-action-message">{actionMessage}</div>
+          <div className={`admin-action-message ${actionMessage.type}`}>
+            {actionMessage.text}
+          </div>
         ) : null}
         <div className="admin-summary-grid">
           {statCards.map(c => (
@@ -183,7 +190,7 @@ export function AdminPanel({ partnerSummaries, records, onToggleDisable }: Props
               ))}
               {partnerSummaries.length === 0 && (
                 <tr>
-                  <td colSpan={7} style={{ textAlign: 'center', color: '#9a7b6a', padding: '24px' }}>
+                  <td colSpan={7} className="admin-empty-state">
                     尚無合作夥伴資料
                   </td>
                 </tr>
@@ -271,7 +278,7 @@ export function AdminPanel({ partnerSummaries, records, onToggleDisable }: Props
                           <div className="admin-action-group">
                             <button
                               type="button"
-                              className="admin-action-btn"
+                              className={`admin-action-btn ${!r.disabled ? 'danger' : ''}`}
                               onClick={() => toggleDisabled(r)}
                             >
                               {r.disabled ? '恢復' : '停用'}
@@ -314,7 +321,7 @@ export function AdminPanel({ partnerSummaries, records, onToggleDisable }: Props
                 })}
                 {filteredRecords.length === 0 && (
                   <tr>
-                    <td colSpan={10} style={{ textAlign: 'center', color: '#9a7b6a', padding: '24px' }}>
+                    <td colSpan={10} className="admin-empty-state">
                       無符合條件的 QR 資料
                     </td>
                   </tr>

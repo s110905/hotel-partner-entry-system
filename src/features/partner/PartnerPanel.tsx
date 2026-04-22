@@ -73,7 +73,10 @@ export function PartnerPanel({ records, onAdd, onIncrementDownload }: PartnerPan
             <span className="partner-stat-badge">名額概況</span>
           </div>
           <strong className="partner-stat-value">{remainingQuota}</strong>
-          <p className="partner-stat-label">總可用名額 / {stats.totalQuota}</p>
+          <p className="partner-stat-label">剩餘可用名額</p>
+          <p className="partner-stat-note" style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: 4 }}>
+            共 {stats.totalQuota} 人
+          </p>
         </motion.article>
 
         <motion.article

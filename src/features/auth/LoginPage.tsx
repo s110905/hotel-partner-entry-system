@@ -45,7 +45,7 @@ export function LoginPage({ onLogin, defaultRole = 'partner', contextLabel }: Pr
             <button
               key={r}
               type="button"
-              onClick={() => setRole(r)}
+              onClick={() => { setRole(r); setError('') }}
               className={`login-role-btn ${role === r ? 'active' : ''}`}
             >
               {r === 'partner' ? '合作飯店' : '管理後台'}
@@ -53,7 +53,7 @@ export function LoginPage({ onLogin, defaultRole = 'partner', contextLabel }: Pr
           ))}
         </div>
 
-        <form onSubmit={handleSubmit} className="login-form">
+        <form onSubmit={handleSubmit} className="login-form" autoComplete="on">
           <div className="login-field">
             <label className="login-label">帳號</label>
             <input
@@ -61,6 +61,7 @@ export function LoginPage({ onLogin, defaultRole = 'partner', contextLabel }: Pr
               className="login-input"
               value={account}
               onChange={(e) => setAccount(e.target.value)}
+              autoComplete="username"
               required
             />
           </div>
@@ -71,6 +72,7 @@ export function LoginPage({ onLogin, defaultRole = 'partner', contextLabel }: Pr
               className="login-input"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
               required
             />
           </div>

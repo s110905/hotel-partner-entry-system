@@ -111,16 +111,18 @@ function App() {
   if (needsAuth) {
     return (
       <div className="app-shell">
-        <nav className="tab-bar" aria-label="主要區塊">
-          <button className={view === 'partner' ? 'active' : ''} onClick={() => handleViewChange('partner')} type="button">
-            發放憑證 (Partner)
-          </button>
-          <button className={(view as any) === 'scan' ? 'active' : ''} onClick={() => handleViewChange('scan')} type="button">
-            現場核銷 (Scan)
-          </button>
-          <button className={view === 'admin' ? 'active' : ''} onClick={() => handleViewChange('admin')} type="button">
-            管理後台 (Admin)
-          </button>
+        <nav className="tab-bar-container">
+          <div className="tab-bar" aria-label="主要區塊">
+            <button className={view === 'partner' ? 'active' : ''} onClick={() => handleViewChange('partner')} type="button">
+              發放憑證 (Partner)
+            </button>
+            <button className={(view as any) === 'scan' ? 'active' : ''} onClick={() => handleViewChange('scan')} type="button">
+              現場核銷 (Scan)
+            </button>
+            <button className={view === 'admin' ? 'active' : ''} onClick={() => handleViewChange('admin')} type="button">
+              管理後台 (Admin)
+            </button>
+          </div>
         </nav>
         <LoginPage
           onLogin={setSession}
