@@ -1,7 +1,6 @@
 import { supabase } from './supabase'
 import type { QrRecord, RedemptionRecord } from '../types/qr'
 
-const DEMO_PARTNER_ID = '00000000-0000-0000-0000-000000000001'
 
 function toQrRecord(row: Record<string, unknown>): QrRecord {
   const redemptions = Array.isArray(row.qr_redemptions)
@@ -39,7 +38,8 @@ export async function fetchRecords(): Promise<QrRecord[]> {
 
 export async function insertQrRecord(
   partnerName: string,
-  totalQuota: number
+  totalQuota: number,
+  partnerId: string
 ): Promise<QrRecord> {
   const now = new Date()
   const expiresAt = new Date(now)
@@ -56,7 +56,7 @@ export async function insertQrRecord(
   const { data, error } = await supabase
     .from('qr_codes')
     .insert({
-      partner_id: DEMO_PARTNER_ID,
+      partner_id: partnerId,
       code,
       total_quota: totalQuota,
       used_quota: 0,
@@ -97,12 +97,13 @@ export async function incrementDownload(id: string): Promise<void> {
 export async function redeemQr(
   id: string,
   amount: number,
-  currentRecord: QrRecord
+  currentRecord: QrRecord,
+  partnerId: string
 ): Promise<QrRecord> {
   const { data, error } = await supabase.rpc('redeem_qr', {
     p_qr_code_id: id,
     p_amount: amount,
-    p_partner_id: '00000000-0000-0000-0000-000000000001',
+    p_partner_id: partnerId,
     p_redeemed_by: null,
   })
 

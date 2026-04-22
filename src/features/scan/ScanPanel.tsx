@@ -8,6 +8,8 @@ import './ScanPanel.css'
 type Props = {
   records: QrRecord[]
   onRedeem: (id: string, amount: number) => Promise<void>
+  isUnlocked: boolean
+  onUnlock: () => void
 }
 
 type Step = 'idle' | 'scanning' | 'found' | 'done'
@@ -29,7 +31,9 @@ function fmtDate(iso: string) {
   })
 }
 
-export function ScanPanel({ records, onRedeem }: Props) {
+export function ScanPanel({ records, onRedeem, isUnlocked, onUnlock }: Props) {
+  const [pin, setPin] = useState('')
+  const [pinError, setPinError] = useState('')
   const [step, setStep] = useState<Step>('idle')
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<QrRecord | null>(null)
@@ -104,6 +108,17 @@ export function ScanPanel({ records, onRedeem }: Props) {
     }
   }
 
+  function handlePinSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (pin === '1234') {
+      onUnlock()
+      setPin('')
+      setPinError('')
+    } else {
+      setPinError('PIN 碼錯誤')
+    }
+  }
+
   function reset() {
     setStep('idle')
     setSelected(null)
@@ -124,6 +139,31 @@ export function ScanPanel({ records, onRedeem }: Props) {
   const maxAmount = selected?.remainingQuota ?? 1
 
   // ── Render ─────────────────────────────────────────────
+
+  if (!isUnlocked) {
+    return (
+      <section className="panel scan-panel">
+        <div className="panel-heading">
+          <h2>現場核銷驗證</h2>
+          <p>請輸入核銷 PIN 碼以繼續</p>
+        </div>
+        <form onSubmit={handlePinSubmit} style={{ display: 'grid', gap: 16, maxWidth: 320, margin: '20px auto' }}>
+          <input
+            type="password"
+            className="scan-search-input"
+            style={{ textAlign: 'center', fontSize: '1.5rem', letterSpacing: '0.5em' }}
+            value={pin}
+            onChange={e => setPin(e.target.value)}
+            placeholder="••••"
+            maxLength={4}
+            autoFocus
+          />
+          {pinError && <p style={{ color: '#dc2626', textAlign: 'center', fontWeight: 600 }}>{pinError}</p>}
+          <button type="submit" className="scan-btn-confirm">驗證並進入</button>
+        </form>
+      </section>
+    )
+  }
 
   return (
     <section className="panel scan-panel">

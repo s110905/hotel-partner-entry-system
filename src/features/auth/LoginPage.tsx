@@ -15,8 +15,16 @@ export function LoginPage({ onLogin, defaultRole = 'partner', contextLabel }: Pr
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [failCount, setFailCount] = useState(0)
+  const [lockUntil, setLockUntil] = useState<number | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
+    if (lockUntil && Date.now() < lockUntil) {
+      const remaining = Math.ceil((lockUntil - Date.now()) / 1000)
+      setError(`登入嘗試次數過多，請等待 ${remaining} 秒後再試`)
+      return
+    }
+
     e.preventDefault()
     setError('')
     setLoading(true)
@@ -24,9 +32,18 @@ export function LoginPage({ onLogin, defaultRole = 'partner', contextLabel }: Pr
       const session = role === 'partner'
         ? await loginPartner(account, password)
         : await loginAdmin(account, password)
+      setFailCount(0)
       onLogin(session)
     } catch (err) {
-      setError(err instanceof Error ? err.message : '登入失敗')
+      const newCount = failCount + 1
+      setFailCount(newCount)
+      if (newCount >= 5) {
+        setLockUntil(Date.now() + 15 * 60 * 1000) // 鎖定 15 分鐘
+        setFailCount(0)
+        setError('登入嘗試次數過多，請等待 15 分鐘後再試')
+      } else {
+        setError(err instanceof Error ? err.message : '登入失敗')
+      }
     } finally {
       setLoading(false)
     }

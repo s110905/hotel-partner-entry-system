@@ -17,6 +17,7 @@ function App() {
   const [records, setRecords] = useState<QrRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [scanUnlocked, setScanUnlocked] = useState(false)
 
   useEffect(() => {
     fetchRecords()
@@ -26,14 +27,17 @@ function App() {
   }, [])
 
   const handleAddRecord = async (partnerName: string, totalQuota: number) => {
-    const newRecord = await insertQrRecord(partnerName, totalQuota)
+    const partnerId = session?.id ?? ''
+    const newRecord = await insertQrRecord(partnerName, totalQuota, partnerId)
     setRecords((prev) => [newRecord, ...prev])
   }
 
   const handleRedeem = async (id: string, amount: number) => {
     const record = records.find((r) => r.id === id)
     if (!record) return
-    const updated = await redeemQr(id, amount, record)
+    // If not admin/partner session (i.e. scan view), use default ID for now
+    const partnerId = session?.id ?? '00000000-0000-0000-0000-000000000001'
+    const updated = await redeemQr(id, amount, record, partnerId)
     setRecords((prev) => prev.map((r) => (r.id === id ? updated : r)))
   }
 
@@ -54,6 +58,12 @@ function App() {
   const handleViewChange = (newView: ViewKey) => {
     if (newView === view) return
     setView(newView)
+    
+    // Reset scan lock when leaving scan view
+    if (view === 'scan' && newView !== 'scan') {
+      setScanUnlocked(false)
+    }
+
     if (newView === 'scan') return
     if (session && (session.role as string) === newView) return
     setSession(null)
@@ -186,7 +196,12 @@ function App() {
         />
       )}
       {view === 'scan' && (
-        <ScanPanel records={records} onRedeem={handleRedeem} />
+        <ScanPanel 
+          records={records} 
+          onRedeem={handleRedeem} 
+          isUnlocked={scanUnlocked}
+          onUnlock={() => setScanUnlocked(true)}
+        />
       )}
       {view === 'admin' && (
         <AdminPanel
